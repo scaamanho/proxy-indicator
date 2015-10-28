@@ -1,0 +1,258 @@
+#!/usr/bin/env python
+# -*- coding: utf-8 -*-
+# copyright 2015 Santiago Caamaño <scaamanho@gmail.com>
+# hereby released under the GNU GPL v3 license.
+# use the PyGObject GObject introspection to use GTK+ 3
+# also see
+# http://readthedocs.org/docs/python-gtk-3-tutorial/en/latest/index.html
+# http://developer.gnome.org/gtk3/stable/ (API reference)
+"""
+An inevitable tool to configure proxy-settings in universities and office environment.
+Eliminates the need of repetitive editing of system files that is prone to frequent manual errors.
+Ubuntu's default network proxy tool is inefficient and fails to configure system wide settings and
+thats the reason for this project's existence.
+
+This tool is based on code "Ubproxy" developed by Sadhanandh Iyer
+see https://code.google.com/p/ubproxy/
+"""
+
+__author__ = 'Santiago Caamaño'
+
+from gi.repository import Gtk, GdkPixbuf, GLib
+
+try:
+    from gi.repository import AppIndicator3 as AppIndicator
+except:
+    from gi.repository import AppIndicator
+import ConfigParser
+import os
+import webbrowser
+
+# Proxy Indicator Config Window
+from ConfigWin import ConfigWin
+
+
+__author__ = 'Santiago Caamaño'
+__website__ = 'https://github.com/scaamanho/'
+
+terminal = 'gnome-terminal'
+app_name = 'Indicator Proxy'
+app_version = '0.2'
+app_website = 'http://scaamanho.github.io/proxy-indicator/'
+enabled_icon = os.path.abspath('proxy_on.png')
+disabled_icon = os.path.abspath('proxy_off.png')
+
+
+class IndicatorProxy:
+    configWin = None
+
+    def __init__(self):
+        self.about_dialog = None
+        # param1: identifier of this indicator
+        # param2: name of icon. this will be searched for in the standard them
+        # dirs
+        # finally, the category. We're monitoring CPUs, so HARDWARE.
+        self.ind = AppIndicator.Indicator.new(
+            app_name,
+            enabled_icon,
+            AppIndicator.IndicatorCategory.COMMUNICATIONS)
+        #                    AppIndicator.IndicatorCategory.SYSTEM_SERVICES)
+        #                    AppIndicator.IndicatorCategory.OTHER)
+        #                    AppIndicator.IndicatorCategory.APPLICATION_STATUS)
+        #                    AppIndicator.IndicatorCategory.HARDWARE)
+
+        # some more information about the AppIndicator:
+        # http://developer.ubuntu.com/api/ubuntu-12.04/python/AppIndicator3-0.1.html
+        # http://developer.ubuntu.com/resources/technologies/application-indicators/
+
+        # need to set this for indicator to be shown
+        self.ind.set_status(AppIndicator.IndicatorStatus.ACTIVE)
+
+        # have to give indicator a menu
+        self.menu = Gtk.Menu()
+
+        # you can use this menu item for experimenting
+        self.itemEnable = Gtk.MenuItem()
+        self.itemEnable.set_label("Enable")
+        self.itemEnable.connect("activate", self.on_enable_proxy)
+        self.itemEnable.show()
+        self.menu.append(self.itemEnable)
+
+        self.itemDisable = Gtk.MenuItem()
+        self.itemDisable.set_label("Disable")
+        self.itemDisable.connect("activate", self.on_disable_proxy)
+        self.itemDisable.show()
+        self.menu.append(self.itemDisable)
+
+        item = Gtk.MenuItem()
+        item.set_label("Configure")
+        item.connect("activate", self.on_configure)
+        item.show()
+        self.menu.append(item)
+
+        sep = Gtk.SeparatorMenuItem()
+        sep.show()
+        self.menu.append(sep)
+
+
+        # Menu extra
+        # Submenu
+        imenu = Gtk.Menu()
+
+        item = Gtk.SeparatorMenuItem()
+        item.show()
+        self.menu.append(item)
+
+        item = Gtk.MenuItem()
+        item.set_label(app_name)
+
+        item.set_submenu(imenu)
+        item.show()
+        self.menu.append(item)
+
+        item = Gtk.MenuItem()
+        item.set_label("About")
+        item.connect("activate", self.handler_about)
+        item.show()
+        imenu.add(item)
+
+        item = Gtk.MenuItem()
+        item.set_label("Web Site")
+        item.connect("activate", self.handler_website)
+        item.show()
+        imenu.add(item)
+
+        item = Gtk.MenuItem()
+        item.set_label("Exit")
+        item.connect("activate", self.handler_exit)
+        item.show()
+        imenu.add(item)
+
+        self.menu.show()
+        self.ind.set_menu(self.menu)
+
+        # Incialize indicator icon
+        self.check_proxy_enabled()
+
+
+    def check_proxy_enabled(self):
+        print('check proxy enabled')
+        # TODO
+        # Set application icon enabled or disabled
+        # Inf proxy configuration is active or not
+        # TODO
+        # Habilitamos/desahabilitamos entradas de menu
+        # self.menu.entryconfig("Enable", state="disabled")
+        # self.intemEnabled.
+
+        config = ConfigParser.RawConfigParser()
+        config.read('config.ini')
+        enable = config.get('ProxyStatus', 'proxy.enable')
+        print(enable)
+        if enable == 'True':
+            self.itemEnable.set_sensitive(False)
+            self.ind.set_icon(enabled_icon)
+        else:
+            self.itemDisable.set_sensitive(False)
+            self.ind.set_icon(disabled_icon)
+
+    # Enables proxy on system
+    def on_enable_proxy(self, evt):
+        print('enable proxy')
+        # Set Components
+        self.ind.set_icon(enabled_icon)
+        self.itemEnable.set_sensitive(False)
+        self.itemDisable.set_sensitive(True)
+        # Enable proxy on system throught SystemProxy
+        command = 'gksudo ./ubproxy enable'
+        os.system(command)
+        self.update_config(True)
+
+    # Disable proxy on system
+    def on_disable_proxy(self, evt):
+        # Set Components
+        self.ind.set_icon(disabled_icon)
+        self.itemEnable.set_sensitive(True)
+        self.itemDisable.set_sensitive(False)
+        # Disable proxy on system
+        command = 'gksudo ./ubproxy disable'
+        os.system(command)
+        self.update_config(False)
+
+    # Launch configuration window
+    def on_configure(self, evt):
+        print('configure proxy')
+
+        if self.configWin is None:
+            self.configWin = ConfigWin()
+            self.configWin.connect("delete-event", self.close_win)
+        else:
+            self.configWin.__init__()
+        # self.configWin.set_position(Gtk.WindowPosition.CENTER)
+        self.configWin.show_all()
+
+    def update_config(self, enable):
+        config = ConfigParser.RawConfigParser()
+        config.read('config.ini')
+        config.set('ProxyStatus', 'proxy.enable', enable)
+        # Write configuration to file
+        with open('config.ini', 'wb') as configfile:
+            config.write(configfile)
+
+    def close_win(self, evt, data):
+        self.log_item(evt)
+        self.log_item(self.configWin)
+
+    def handler_about(self, evt):
+        if self.about_dialog:
+            self.about_dialog.present()
+        else:
+            self.about_dialog = self.get_about_dialog()
+            self.about_dialog.run()
+            self.about_dialog.destroy()
+            self.about_dialog = None
+
+    def handler_website(self, evt):
+        webbrowser.open(app_website)
+
+    def handler_exit(self, evt):
+        Gtk.main_quit()
+
+    def log_item(self, item):
+        print(dir(item.props))
+
+    def get_about_dialog(self):
+        """Create and populate the about dialog."""
+        about_dialog = Gtk.AboutDialog()
+        about_dialog.set_name(app_name)
+        about_dialog.set_version(app_version)
+        about_dialog.set_copyright('Copyrignt (c) 2015\nSantiago Caamaño')
+        about_dialog.set_comments('An indicator for Corporative Proxy')
+        about_dialog.set_license('' +
+                                 'This program is free software: you can redistribute it and/or modify it\n' +
+                                 'under the terms of the GNU General Public License as published by the\n' +
+                                 'Free Software Foundation, either version 3 of the License, or (at your option)\n' +
+                                 'any later version.\n\n' +
+                                 'This program is distributed in the hope that it will be useful, but\n' +
+                                 'WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY\n' +
+                                 'or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for\n' +
+                                 'more details.\n\n' +
+                                 'You should have received a copy of the GNU General Public License along with\n' +
+                                 'this program.  If not, see <http://www.gnu.org/licenses/>.')
+        about_dialog.set_website(app_website)
+        about_dialog.set_website_label(app_website)
+        about_dialog.set_authors(['Santiago Caamaño <https://github.com/scaamanho/>'])
+        about_dialog.set_documenters(['Santiago Caamaño <https://github.com/scaamanho/>'])
+        about_dialog.set_translator_credits('')
+        about_dialog.set_icon(GdkPixbuf.Pixbuf.new_from_file('icon.png'))
+        about_dialog.set_logo(GdkPixbuf.Pixbuf.new_from_file('logo.png'))
+        about_dialog.set_program_name(app_name)
+        return about_dialog
+
+    def main(self):
+        Gtk.main()
+
+
+if __name__ == "__main__":
+    ind = IndicatorProxy()
+    ind.main()

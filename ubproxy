@@ -1,0 +1,252 @@
+#!/usr/bin/python
+#
+#   "Ubproxy"
+#   without GTK Interface
+#
+#   Ubuntu proxy setting tool.
+#   This sets the apt,bash and profile config-files.
+#   Network proxy-settings with user-name and password can only be configured with this tool .
+#   
+#   Supports Ubuntu 8.04 - Ubuntu 11.10 (Latest as of Jan 2012)
+#   An inevitable tool to configure proxy-settings in universities and office environmment.
+#   Eliminates the need of repetitive editing of system files that is prone to frequent manual errors.  
+#   Atleast 3 dfferent individual config files needs to be edited to configure proxy settings,
+#   especially the network proxy-settings with user-name and password.
+#   This can be used in an environment where all the Three - ("http","https" and the "ftp") proxies have the same settings.
+#   
+#  Visit The project url at  http://goo.gl/qjR9s
+
+#   Author:  Sadhanandh Iyer
+#
+#   E-mail:  sadhanandhiyer[@]gmail[.]com
+#
+#   Date:    1/2/2011
+#
+#   Profile: http://goo.gl/IVg3g
+#
+#   Meta:   
+#            Sadhanandh Iyer
+#            Linux Community 
+#            ABV - Indian Institute of Information Technology and Management - Gwalior
+
+#   """With power comes responsibility, so 'sudo' with care"""
+#
+#   Powered By:
+#               Ubuntu 11.10 & Vim 7.3.35
+#   
+#
+#   Ver. - 2.2.13
+#
+#Adapted by Santiago Caamanho to minimal functionality
+#and invoke this script with parameters that modify its functionality
+#valid parameters enable or disabled
+
+import gtk
+import os
+import re
+import sys
+from datetime import datetime
+import ConfigParser
+
+filenames = ["/etc/bash.bashrc", "/etc/environment"]
+filename2 = "/etc/apt/apt.conf"
+logs = "/var/log/proxychangerlog"
+
+
+class UProxy:
+    def __init__(self):
+        self.opentext()
+        # Load configuration file
+        self.config = ConfigParser.RawConfigParser()
+        self.config.read('config.ini')
+        # Set proxy values
+        self.host = self.config.get('ProxyConfig', 'proxy.host')
+        self.port = self.config.get('ProxyConfig', 'proxy.port')
+        if self.config.get('ProxyConfig', 'proxy.auth') == 'True':
+            self.auth = True
+        else:
+            self.auth = False
+        print ('init:')
+        print(self.auth)
+        self.uname = self.config.get('ProxyConfig', 'proxy.user')
+        self.passw = self.config.get('ProxyConfig', 'proxy.password')
+
+    def destroy(self, widget, data=None):
+        if (self.flog != None):
+            self.flog.close()
+
+    #Modify config files to set proxy enabled (insert proxy entries)
+    def enable_proxy(self):
+        backup([filenames[0], filenames[1], filename2])
+        self.flog.write("Files have been backed up in '~/.Ubuntu-Proxy/'  with .backup extension \n")
+        clean(filename2, filenames)
+        # self.fin()
+
+        print ('set:')
+        print(self.auth)
+
+        if (self.auth):
+            filewrite4(self.host, self.port, self.uname, self.passw)
+            self.flog.write("4 var proxy changed \n")
+        else:
+            filewrite2(self.host, self.port)
+            self.flog.write("2 var proxy changed \n")
+        self.mbx = gtk.MessageDialog(None, gtk.DIALOG_DESTROY_WITH_PARENT, gtk.MESSAGE_INFO, gtk.BUTTONS_CLOSE,
+                                     "SUCCESSFULLY SET")
+        self.mbx.run()
+        self.mbx.destroy()
+
+    #Modify config files to set proxy disabled (delete proxy entries)
+    def disable_proxy(self):
+        backup([filenames[0], filenames[1], filename2])
+        self.flog.write("Files have been backed up in '~/.Ubuntu-Proxy/' with .backup extension \n")
+        clean(filename2, filenames)
+        self.flog.write("Old Proxy-Settings removed \n")
+        self.mbx = gtk.MessageDialog(None, gtk.DIALOG_DESTROY_WITH_PARENT, gtk.MESSAGE_INFO, gtk.BUTTONS_CLOSE,
+                                     "SUCCESSFULLY REMOVED")
+        self.mbx.run()
+        self.mbx.destroy()
+
+    #Check root permisions and open log file
+    def opentext(self):
+        try:
+            self.flog = open(logs, "a")
+            self.flog.write(str(datetime.now()) + "\n")
+        except:
+            self.flog = None
+            md = gtk.MessageDialog(None, gtk.DIALOG_DESTROY_WITH_PARENT, gtk.MESSAGE_ERROR, gtk.BUTTONS_CLOSE,
+                                   "You are not a Root user --Run This as 'sudo'")
+            md.run()
+            md.destroy()
+            sys.exit(0)
+
+
+def filewrite2(srv, port):
+    lin = []
+    typ0 = ("http", "ftp", "https")
+    for filenam in filenames:
+        fil = open(filenam, "a")
+        for x in typ0:
+            if (filenam.find("bash") != -1):
+                lin.append("export %s_proxy=\"%s://%s:%s\"\n" % (x, x, srv, port))
+            else:
+                lin.append("%s_proxy=\"%s://%s:%s\"\n" % (x, x, srv, port))
+        for l in lin:
+            fil.write(l)
+        fil.close()
+        lin = []
+
+    lin2 = []
+    fil = open(filename2, "w")
+    for x1 in typ0:
+        lin2.append('Acquire::%s::proxy "%s://%s:%s/";\n' % (x1, x1, srv, port))
+    for l1 in lin2:
+        fil.write(l1)
+    fil.close()
+
+
+def filewrite4(srv, port, name, pasw):
+    lin = []
+    typ0 = ("http", "ftp", "https")
+    for filenam in filenames:
+        fil = open(filenam, "a")
+        for x in typ0:
+            if (filenam.find("bash") != -1):
+                lin.append("export %s_proxy=\"%s://%s:%s@%s:%s\"\n" % (x, x, name, pasw, srv, port))
+            else:
+                lin.append("%s_proxy=\"%s://%s:%s@%s:%s\"\n" % (x, x, name, pasw, srv, port))
+        for l in lin:
+            fil.write(l)
+        fil.close()
+        lin = []
+
+    lin2 = []
+    fil = open(filename2, "w")
+    for x1 in typ0:
+        lin2.append('Acquire::%s::proxy "%s://%s:%s@%s:%s/";\n' % (x1, x1, name, pasw, srv, port))
+    for l1 in lin2:
+        fil.write(l1)
+    fil.close()
+
+
+def backup(files):
+    homefol = os.getenv('HOME')
+    folder = homefol + "/.Ubuntu-Proxy/"
+    try:
+        os.mkdir(folder)
+    except:
+        pass
+
+    filstr = datetime.now().strftime('%Y%h%d_%H%M%S')
+    newfolder = folder + filstr + "/"
+    try:
+        os.mkdir(newfolder)
+    except:
+        pass
+
+    for fil in files:
+        try:
+            f1 = open(fil, "r")
+            l = f1.read()
+            f1.close()
+
+            if (fil.find(".") == -1):
+                newname = fil[fil.rfind('/') + 1:] + ".backup"
+            else:
+                fil = fil[fil.rfind('/') + 1:]
+                newname = fil[:fil.find(".")] + ".backup"
+            newname = newfolder + newname
+            f2 = open(newname, "w")
+            f2.write(l)
+            f2.close()
+        except:
+            pass
+
+
+def clean(file2, files, para=False):
+    if (para):
+        for file1 in files:
+            try:
+                f = open(file1, 'r')
+                l = f.read()
+                l = re.sub(r'\n?(.*http_proxy\s*=\s*".*")', r'\n# \g<1>', l)
+                l = re.sub(r'\n?(.*https_proxy\s*=\s*".*")', r'\n# \g<1>', l)
+                l = re.sub(r'\n?(.*ftp_proxy\s*=\s*".*")', r'\n# \g<1>', l)
+                f.close()
+                f = open(file1, 'w')
+                f.write(l)
+                f.close()
+            except:
+                pass
+    else:
+        for file1 in files:
+            try:
+                f = open(file1, 'r')
+                l = f.read()
+                l = re.sub(r'\n?(.*http_proxy\s*=\s*".*")', r'', l)
+                l = re.sub(r'\n?(.*https_proxy\s*=\s*".*")', r'', l)
+                l = re.sub(r'\n?(.*ftp_proxy\s*=\s*".*")', r'', l)
+                f.close()
+                f = open(file1, 'w')
+                f.write(l)
+                f.close()
+            except:
+                pass
+        try:
+            f = open(file2, "r")
+            l = f.read()
+            l = re.sub(r'\n?(.*Acquire.*".*?";)', "", l)
+            f.close()
+            f = open(file2, 'w')
+            f.write(l)
+            f.close()
+        except:
+            pass
+
+if __name__ == "__main__":
+    base = UProxy()
+    arg = sys.argv[1]
+    if arg == 'enable':
+        base.enable_proxy()
+    else:
+        base.disable_proxy()
