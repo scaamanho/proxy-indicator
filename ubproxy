@@ -57,8 +57,10 @@ class UProxy:
     def __init__(self):
         self.opentext()
         # Load configuration file
+        config_file = os.getenv("HOME")+'/.config/proxy-indicator/config.ini'
         self.config = ConfigParser.RawConfigParser()
-        self.config.read('config.ini')
+        self.config.read(config_file)
+
         # Set proxy values
         self.host = self.config.get('ProxyConfig', 'proxy.host')
         self.port = self.config.get('ProxyConfig', 'proxy.port')
