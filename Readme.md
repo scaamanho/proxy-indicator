@@ -20,10 +20,16 @@ This project is roughly inspired in
 
 
 ## DONE  
-* Subirlo a github y cambiar url aplication
+### V 0.1
+* Funcionalidad basica inicial  
+
+### V 0.2
+* Subirlo a github y cambiar url aplication  
+
+### V 0.3
 * Ventana config con glade
 * Checkear proxy en los ficheros /etc/bash.bashrc /etc/environment /etc/apt/apt.conf si existe proxy
-* Config file in user dir
+* Fichero de configuracion en directorio de usuario
 
 ## BUGS
 
