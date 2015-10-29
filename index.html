@@ -32,7 +32,11 @@
 <a id="proxy-indicator" class="anchor" href="#proxy-indicator" aria-hidden="true"><span class="octicon octicon-link"></span></a>Proxy Indicator</h1>
 
 <p>Proxy Indicator is a tool utility so set/unset proxy settings in ubuntu 
-in corporative networks where user and password is required </p>
+in corporative networks where user and password are needed. </p>
+
+<p>You can set/unset proxy settings in a click  </p>
+
+<p>Use your default proxy configuration to set proxy  </p>
 
 <p>This project is roughly inspired in 
 <a href="https://code.google.com/p/ubproxy/">uproxy</a>.  </p>
@@ -45,7 +49,15 @@ in corporative networks where user and password is required </p>
 <h2>
 <a id="install" class="anchor" href="#install" aria-hidden="true"><span class="octicon octicon-link"></span></a>Install</h2>
 
-<p>[TODO]</p>
+<p>[TODO]<br>
+extract file and move <code>proxy-indicator</code> directory to <code>/opt/extras.ubuntu.com/</code></p>
+
+<div class="highlight highlight-source-shell"><pre>sudo mkdir -p  /opt/extras.ubuntu.com/
+tar xvf proxy-indicator.tar.gz
+chmod +x proxy-indicator/run
+sudo mv proxy-indicator /opt/extras.ubuntu.com/</pre></div>
+
+<p>Add <code>/opt/extras.ubuntu.com/proxy-indicator/run</code> to inital programs</p>
 
 <h2>
 <a id="configure" class="anchor" href="#configure" aria-hidden="true"><span class="octicon octicon-link"></span></a>Configure</h2>
