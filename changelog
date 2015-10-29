@@ -4,7 +4,7 @@
 * Multilenguaje
 * Mejorar path de ejecucion resuelto con script run (ver inplanmng set dir de ejecucion)
 * Mejorar la detecion de falsos positivos en lienas como #http_proxy
-*
+* Multi Proxy configuration
 *
 
 
