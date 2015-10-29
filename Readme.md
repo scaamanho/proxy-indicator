@@ -16,7 +16,7 @@ This project is roughly inspired in
 
 ## Install  
 [TODO]  
-extract and move proxy-indicator directory to `/opt/extras.ubuntu.com/`
+extract file and move `proxy-indicator` directory to `/opt/extras.ubuntu.com/`
 
 ```sh
 sudo mkdir -p  /opt/extras.ubuntu.com/
@@ -25,7 +25,7 @@ chmod +x proxy-indicator/run
 sudo mv proxy-indicator /opt/extras.ubuntu.com/
 ```
 
-Add `/opt/extras.ubuntu.com/proxy-indicator/run` to init
+Add `/opt/extras.ubuntu.com/proxy-indicator/run` to inital programs
 
 ## Configure    
 [TODO]
