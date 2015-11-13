@@ -8,7 +8,7 @@ You can set/unset proxy settings in a click
 Use your default proxy configuration to set proxy
 
 ### dependencies 
-
+* python-gkt3
 * gir1.2-appindicator-0.1
 * gir1.2-appindicator3-0.1
 
@@ -30,7 +30,12 @@ This project is roughly inspired in
 [uproxy](https://code.google.com/p/ubproxy/).  
 
 ## Version  
-0.3
+* V 0.3.1 [2015/11/14]
+
+##Changelog
+* V 0.3 [2015/10/28]
+* V 0.2 [2015/10/27]
+* V 0.1 [2015/10/26]
 
 ## Install  
 [TODO]  

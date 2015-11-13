@@ -23,14 +23,14 @@
 * Checkear proxy en los ficheros /etc/bash.bashrc /etc/environment /etc/apt/apt.conf si existe proxy
 * Fichero de configuracion en directorio de usuario
 
-### V 0.3.1 [2015/10/29]
+### V 0.3.1 [2015/11/14]
 * Corregido error con la deteccion del fichero de configuracion con el comando sudo en ubproxy
 * Asociar ventana al dialog con resultados del proxy
 * Cambiamos boton de cancelar de los dialogos del resultado del cambio de proxy por aceptar
 * IOError: [Errno 2] No existe el archivo o el directorio: '/etc/apt/apt.conf' al arrancar cuando no existe
 
 
-### V 0.3.2 [2015/10/29]
+### V 0.3.2 []
 * 
 
 ### V 0.4 []
