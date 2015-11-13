@@ -9,8 +9,8 @@ Use your default proxy configuration to set proxy
 
 ### dependencies 
 
-* gir1.2-appindicator
-* gir1.2-appindicator3
+* gir1.2-appindicator-0.1
+* gir1.2-appindicator3-0.1
 
 
 ### *gnome 3 extension* 
@@ -21,7 +21,9 @@ Use your default proxy configuration to set proxy
 ### Tested in 
 * Ubuntu 14.04
 * Xubuntu 14.04
+* Lubuntu 14.04
 * Ubuntu Gnome 14.04
+* Ubuntu Mate 15.10
 
 
 This project is roughly inspired in 
