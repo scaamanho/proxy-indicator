@@ -18,7 +18,7 @@ see https://code.google.com/p/ubproxy/
 
 __author__ = 'Santiago Caamaño'
 
-from gi.repository import Gtk, GdkPixbuf, GLib
+from gi.repository import Gtk as gtk, GdkPixbuf, GLib
 
 try:
     from gi.repository import AppIndicator3 as AppIndicator
@@ -35,16 +35,18 @@ __website__ = 'https://github.com/scaamanho/'
 
 terminal = 'gnome-terminal'
 app_name = 'Indicator Proxy'
-app_version = '0.3'
-app_website = 'https://github.com/scaamanho/'
+app_version = '0.3.1'
+app_website = 'http://scaamanho.github.io/proxy-indicator/'
 enabled_icon = os.path.abspath('proxy_on.png')
 disabled_icon = os.path.abspath('proxy_off.png')
 
 
-class IndicatorProxy:
+class IndicatorProxy(gtk.Window):
     configWin = None
 
     def __init__(self):
+
+        gtk.Window.__init__(self, title='')
 
         # Create if not exist config file
         self.check_config_file()
@@ -75,10 +77,10 @@ class IndicatorProxy:
         self.ind.set_status(AppIndicator.IndicatorStatus.ACTIVE)
 
         # have to give indicator a menu
-        self.menu = Gtk.Menu()
+        self.menu = gtk.Menu()
 
         # Add items to menu
-        self.mi_enable = Gtk.MenuItem()
+        self.mi_enable = gtk.MenuItem()
         self.mi_enable.set_label("Enable")
         self.mi_enable.show()
         # Add item to menu
@@ -86,28 +88,28 @@ class IndicatorProxy:
         # Connect signals
         self.mi_enable.connect("activate", self.on_enable_proxy_activate)
 
-        self.mi_disable = Gtk.MenuItem()
+        self.mi_disable = gtk.MenuItem()
         self.mi_disable.set_label("Disable")
         self.mi_disable.show()
         self.menu.append(self.mi_disable)
         self.mi_disable.connect("activate", self.on_disable_proxy_activate)
 
         # Not state menu items (allways enabled)
-        item = Gtk.MenuItem()
+        item = gtk.MenuItem()
         item.set_label("Configure")
         item.show()
         self.menu.append(item)
         item.connect("activate", self.on_configure_activate)
 
         # Add separator
-        sep = Gtk.SeparatorMenuItem()
+        sep = gtk.SeparatorMenuItem()
         sep.show()
         self.menu.append(sep)
 
         # Menu with submenus
-        sub_menu = Gtk.Menu()
+        sub_menu = gtk.Menu()
         #Menu item container
-        item = Gtk.MenuItem()
+        item = gtk.MenuItem()
         item.set_label(app_name)
         #Set submenu to item
         item.set_submenu(sub_menu)
@@ -115,19 +117,19 @@ class IndicatorProxy:
         self.menu.append(item)
 
         #Submenu items
-        item = Gtk.MenuItem()
+        item = gtk.MenuItem()
         item.set_label("About")
         item.connect("activate", self.on_about_activate)
         item.show()
         sub_menu.add(item)
 
-        item = Gtk.MenuItem()
+        item = gtk.MenuItem()
         item.set_label("Web Site")
         item.connect("activate", self.on_website_activate)
         item.show()
         sub_menu.add(item)
 
-        item = Gtk.MenuItem()
+        item = gtk.MenuItem()
         item.set_label("Exit")
         item.connect("activate", self.on_exit_activate)
         item.show()
@@ -148,13 +150,16 @@ class IndicatorProxy:
         filenames = ["/etc/bash.bashrc", "/etc/environment","/etc/apt/apt.conf"]
         proxy_enabled = False
         for file_name in filenames:
-            # If find it in one file its enought
-            file = open(file_name, 'r')
-            line = file.read()
-            file.close()
-            if line.find('http_proxy') != -1:
-                proxy_enabled = True
-                break
+            try:
+                # If find it in one file its enought
+                file = open(file_name, 'r')
+                line = file.read()
+                file.close()
+                if line.find('http_proxy') != -1:
+                    proxy_enabled = True
+                    break
+            except:
+                print file_name+" not found"
         return proxy_enabled
 
     #Check if exist config file and create if not exist
@@ -162,8 +167,8 @@ class IndicatorProxy:
         directory = os.getenv("HOME")+'/.config/proxy-indicator'
         if not os.path.exists(directory):
             os.makedirs(directory)
-        file_name = directory + '/config.ini'
-        if (not os.path.exists(file_name)):
+        self.config_file = directory + '/config.ini'
+        if (not os.path.exists(self.config_file)):
             lines = []
             lines.append('[ProxyConfig]\n')
             lines.append('proxy.host = \n')
@@ -171,7 +176,7 @@ class IndicatorProxy:
             lines.append('proxy.user = \n')
             lines.append('proxy.password =\n')
             lines.append('proxy.auth = True\n')
-            file =  open(file_name, "w+")
+            file =  open(self.config_file, "w+")
             for line in lines:
                 file.write(line)
             file.close()
@@ -180,8 +185,13 @@ class IndicatorProxy:
     # Enables proxy on system
     def on_enable_proxy_activate(self, evt):
         # Enable proxy on system
-        command = 'gksudo ./ubproxy enable'
+        command = 'gksudo ./ubproxy enable '+self.config_file
         os.system(command)
+
+        #Show result message Dialog
+        if self.check_proxy_enabled():
+            self.show_dialog('Proxy Successfully Set')
+
         #Update indicator state
         self.set_indicator_state()
 
@@ -189,8 +199,13 @@ class IndicatorProxy:
     # Disable proxy on system
     def on_disable_proxy_activate(self, evt):
         # Disable proxy on system
-        command = 'gksudo ./ubproxy disable'
+        command = 'gksudo ./ubproxy disable '+self.config_file
         os.system(command)
+
+         #Show result message Dialog
+        if not self.check_proxy_enabled():
+            self.show_dialog('Proxy Successfully Removed')
+
         #Update indicator state
         self.set_indicator_state()
 
@@ -215,6 +230,8 @@ class IndicatorProxy:
             self.mi_disable.set_sensitive(False)
             self.ind.set_icon(disabled_icon)
 
+
+
     # Show about dialog
     def on_about_activate(self, evt):
         if self.about_dialog:
@@ -231,15 +248,23 @@ class IndicatorProxy:
 
     # Exit indicator
     def on_exit_activate(self, evt):
-        Gtk.main_quit()
+        gtk.main_quit()
 
     def log_item(self, item):
         print(dir(item.props))
 
+    #Show info dialog about proxy change actions
+    def show_dialog(self, text_to_show):
+        dialog = gtk.MessageDialog(self, 0, gtk.MessageType.INFO,
+            gtk.ButtonsType.OK, text_to_show)
+        dialog.run()
+        dialog.destroy()
+        dialog = None
+
     # Build application about dialog
     def get_about_dialog(self):
         """Create and populate the about dialog."""
-        about_dialog = Gtk.AboutDialog()
+        about_dialog = gtk.AboutDialog()
         about_dialog.set_name(app_name)
         about_dialog.set_version(app_version)
         about_dialog.set_copyright('Copyrignt (c) 2015\nSantiago Caamaño')
@@ -266,7 +291,7 @@ class IndicatorProxy:
         return about_dialog
 
     def main(self):
-        Gtk.main()
+        gtk.main()
 
 
 if __name__ == "__main__":
