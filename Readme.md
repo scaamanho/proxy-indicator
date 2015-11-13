@@ -8,7 +8,7 @@ You can set/unset proxy settings in a click
 Use your default proxy configuration to set proxy
 
 ### dependencies 
-* python-gkt3
+* python-gtk3
 * gir1.2-appindicator-0.1
 * gir1.2-appindicator3-0.1
 
