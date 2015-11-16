@@ -47,6 +47,8 @@ import re
 import sys
 from datetime import datetime
 import ConfigParser
+#from Crypto.Cipher import ARC4
+
 
 filenames = ["/etc/bash.bashrc", "/etc/environment"]
 filename2 = "/etc/apt/apt.conf"
@@ -71,6 +73,13 @@ class UProxy:
         print(self.auth)
         self.uname = self.config.get('ProxyConfig', 'proxy.user')
         self.passw = self.config.get('ProxyConfig', 'proxy.password')
+
+        '''
+        cypher = ARC4.new('01234567')
+        print "password:"+self.passw
+        self.passw = cypher.decrypt(self.passw)
+        print "password:"+self.passw
+        '''
 
     def destroy(self, widget, data=None):
         if (self.flog != None):

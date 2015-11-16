@@ -1,10 +1,13 @@
 from gi.repository import Gtk as gtk, GLib
 import ConfigParser
 import os
-
+#from Crypto.Cipher import ARC4
 
 class ConfigWin():
     def __init__(self):
+        # Init cypher
+        #self.cypher = ARC4.new('01234567')
+
         #Init Glade Builder
         builder = gtk.Builder()
         builder.add_from_file('proxy_config.glade')
@@ -29,7 +32,15 @@ class ConfigWin():
         self.tf_host.set_text(self.config.get('ProxyConfig', 'proxy.host'))
         self.tf_port.set_text(self.config.get('ProxyConfig', 'proxy.port'))
         self.tf_user.set_text(self.config.get('ProxyConfig', 'proxy.user'))
-        self.tf_pass.set_text(self.config.get('ProxyConfig', 'proxy.password'))
+
+        password = self.config.get('ProxyConfig', 'proxy.password')
+        '''
+        print "password:"+password
+        password = self.cypher.decrypt(password)
+        print "password:"+password
+        '''
+
+        self.tf_pass.set_text(password)
         self.cb_auth.set_active(False)
         if self.config.get('ProxyConfig', 'proxy.auth') == 'True':
             self.cb_auth.set_active(True)
@@ -72,7 +83,14 @@ class ConfigWin():
         self.config.set('ProxyConfig', 'proxy.port', self.tf_port.get_text().strip())
         self.config.set('ProxyConfig', 'proxy.auth', self.cb_auth.get_active())
         self.config.set('ProxyConfig', 'proxy.user', self.tf_user.get_text().strip())
-        self.config.set('ProxyConfig', 'proxy.password', self.tf_pass.get_text().strip())
+
+        password = self.tf_pass.get_text()
+        '''
+        print "password:"+password
+        password = self.cypher.encrypt(password)
+        print "password:"+password
+        '''
+        self.config.set('ProxyConfig', 'proxy.password', password)
 
         # Write configuration to file
         with open(self.config_file, 'wb') as configfile:
