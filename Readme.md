@@ -9,6 +9,8 @@ Use your default proxy configuration to set proxy
 
 ![indicator](https://github.com/scaamanho/proxy-indicator/blob/master/images/proxy-indicator.png)
 
+![indicator-config](https://github.com/scaamanho/proxy-indicator/blob/master/images/proxy-config.png)
+
 ### dependencies 
 * python-gtk3
 * gir1.2-appindicator-0.1
