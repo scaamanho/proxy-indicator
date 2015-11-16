@@ -7,9 +7,12 @@
 * Multi Proxy configuration
 * Encript password
 * Crear campo no proxy host
+
+* Dialogos gtk3  mejorar iconos(ubproxy)
+
+## DONE
 * Falla al comprobar apt.conf si no existe
 * tamaño de los iconos en XFCE mas pequeños (24) proxyon y proxyoff
-* Dialogos gtk3  mejorar iconos(ubproxy)
 
 
 ### V 0.1 [2015/10/26]
@@ -30,8 +33,10 @@
 * IOError: [Errno 2] No existe el archivo o el directorio: '/etc/apt/apt.conf' al arrancar cuando no existe
 
 
+
 ### V 0.3.2 []
-* 
+* Resized icons for xfce look
+*Adding images to doc
 
 ### V 0.4 []
 *

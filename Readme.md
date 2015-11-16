@@ -7,6 +7,8 @@ You can set/unset proxy settings in a click
 
 Use your default proxy configuration to set proxy
 
+![indicator](https://github.com/scaamanho/proxy-indicator/blob/master/limages/proxy-indicator.png)
+
 ### dependencies 
 * python-gtk3
 * gir1.2-appindicator-0.1
