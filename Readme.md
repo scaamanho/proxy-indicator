@@ -7,7 +7,7 @@ You can set/unset proxy settings in a click
 
 Use your default proxy configuration to set proxy
 
-![indicator](https://github.com/scaamanho/proxy-indicator/blob/master/limages/proxy-indicator.png)
+![indicator](https://github.com/scaamanho/proxy-indicator/blob/master/images/proxy-indicator.png)
 
 ### dependencies 
 * python-gtk3
