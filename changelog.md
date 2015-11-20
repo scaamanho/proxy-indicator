@@ -9,6 +9,7 @@
 * Creat package .deb
 * Dialogos gtk3  mejorar iconos(ubproxy)
 * Detectar multiples enables by diferen users
+* Backups en el directorio del usuario
 
 ## DONE
 * Falla al comprobar apt.conf si no existe
