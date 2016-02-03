@@ -43,7 +43,7 @@ This project is roughly inspired in
 
 ## Install  
 [TODO]  
-extract file and move `proxy-indicator` directory to `/opt/extras.ubuntu.com/`
+extract file and move `proxy-indicator` directory to `/usr/local/bin/`
 
 ```sh
 sudo mkdir -p  /usr/local/bin/proxy-indicator/
